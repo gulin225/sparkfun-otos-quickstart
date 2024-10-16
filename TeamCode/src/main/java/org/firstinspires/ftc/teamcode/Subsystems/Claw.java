@@ -27,7 +27,7 @@ public class Claw {
     public void moveClaw(clawStates state){
         switch (state){
             case spinOn:
-                activeIntake.setPower(1);
+                activeIntake.setPower(-1);
                 break;
             case spinOff:
                 activeIntake.setPower(0);

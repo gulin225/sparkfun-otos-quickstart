@@ -31,24 +31,35 @@ public class TeleOperation extends LinearOpMode {
        robot.init();
 
        while (!isStopRequested() && opModeIsActive()){
+            robot.verticalSlides.PIDLoop();
+           if (gamepad1.square) robot.intake();
+           if (gamepad1.circle) robot.outtake();
 
-           if (gamepad2.left_bumper) robot.intake();
-           if (gamepad2.right_bumper) robot.outtake();
-           if (gamepad2.dpad_down) robot.verticalSlides.setSlidesDown();
-           if(gamepad2.dpad_up) robot.verticalSlides.setSlidesUp();
-            if(gamepad2.a) {
-                robot.claw.moveClaw(Claw.clawStates.intake);
-                robot.claw.moveClaw(Claw.clawStates.spinOn);
-            }
-            telemetry.addLine(gamepad1.right_trigger + "");
+           if((gamepad1.right_trigger > .2)) robot.claw.moveClaw(Claw.clawStates.spinOn);
+           else  robot.claw.moveClaw(Claw.clawStates.spinOff);
+
+            telemetry.addLine(gamepad2.right_trigger + "");
+           telemetry.addLine(gamepad2.left_trigger + "");
             if(gamepad2.b) {
                 robot.claw.moveClaw(Claw.clawStates.outtake);
                 robot.claw.moveClaw(Claw.clawStates.spinOff);
             }
-           if (gamepad1.dpad_down)//low
-           if (gamepad1.dpad_left)//middle
-           if (gamepad1.dpad_up)//third
-           if (gamepad1.dpad_right)//fourth
+           if (gamepad1.dpad_down) {
+
+               robot.verticalSlides.setSlides(VerticalSlides.slideStates.intake);
+           }
+           if (gamepad1.dpad_left) {
+               robot.outtake();
+               robot.verticalSlides.setSlides(VerticalSlides.slideStates.lowBasket);
+           }
+           if (gamepad1.dpad_up) {
+               robot.outtake();
+               robot.verticalSlides.setSlides(VerticalSlides.slideStates.highRung);
+           }
+           if (gamepad1.dpad_right) {
+               robot.outtake();
+               robot.verticalSlides.setSlides(VerticalSlides.slideStates.highBasket);
+           }
 
            if (gamepad1.left_bumper) robot.claw.moveClaw(Claw.clawStates.open);
            if (gamepad1.right_bumper) robot.claw.moveClaw(Claw.clawStates.close);

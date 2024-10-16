@@ -17,7 +17,10 @@ public class VerticalSlides {
     boolean leftBackFrontRight = true;
     public static double f = 0.1;
 
-   // public static int target =0;
+    public enum slideStates{
+        intake, lowBasket, highRung, highBasket
+    }
+   public static int target =0;
     //p = 0.01 d = .001
     public static double pUp = 0.021, iUp = 0, dUp = 0.000225;
     public static double pDown = 0.015, iDown = 0, dDown = 0.00012;
@@ -47,7 +50,7 @@ public class VerticalSlides {
     }
 
 
-    public void PIDLoop(int target){
+    public void PIDLoop(){
 
         int armPos = backRightSlidePID.getCurrentPosition();
 
@@ -101,11 +104,28 @@ public class VerticalSlides {
     }
 
     public void setSlidesUp(){
-        PIDLoop(1000);
+        target = 500;
     }
 
     public void setSlidesDown(){
-        PIDLoop(0);
+        target = 0;
+    }
+
+    public void setSlides(slideStates state){
+        switch (state){
+            case intake:
+                target=0;
+                break;
+            case lowBasket:
+                target=200;
+                break;
+            case highRung:
+                target=500;
+                break;
+            case highBasket:
+                target=800;
+                break;
+        }
     }
 
     public void test(double one, double two, double three, double four){

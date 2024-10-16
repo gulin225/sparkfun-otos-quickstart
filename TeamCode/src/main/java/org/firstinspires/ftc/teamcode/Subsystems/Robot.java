@@ -23,7 +23,7 @@ public class Robot {
         claw.moveClaw(Claw.clawStates.wristIntake);
         claw.moveClaw(Claw.clawStates.intake);
         linearRail.moveRail(LinearRail.linearRailStates.intake);
-        claw.moveClaw(Claw.clawStates.spinOn);
+
     }
 
     public void intake(){
