@@ -20,8 +20,8 @@ private PIDController controllerUp, controllerDown;
 
     public static int target =0;
     //p = 0.01 d = .001
-    public static double pUp = 0.02, iUp = 0, dUp = 0.000225;
-    public static double pDown = 0.012, iDown = 0, dDown = 0.0012;
+    public static double pUp = 0.021, iUp = 0, dUp = 0.000225;
+    public static double pDown = 0.015, iDown = 0, dDown = 0.00012;
     public final double ticks_in_degrees = 145.1/360; //num of ticks per rotation we need to find this out
     DcMotorEx backLeftSlide, backRightSlidePID, frontLeftSlide, frontRightSlide;
 
@@ -84,19 +84,41 @@ private PIDController controllerUp, controllerDown;
             telemetry.addData("target", target);
 
           //
-            if(leftBackFrontRight){
+//            if(leftBackFrontRight){
+//                backLeftSlide.setPower(power);
+//                frontRightSlide.setPower(power);
+//                leftBackFrontRight = false;
+//            }
+//            else{
+//                backRightSlidePID.setPower(power);
+//                frontLeftSlide.setPower(power);
+//                leftBackFrontRight = true;
+//            }
+            int num = 1;
+            if(num == 1){
                 backLeftSlide.setPower(power);
                 frontRightSlide.setPower(power);
-                leftBackFrontRight = false;
-            }
-            else{
-                backRightSlidePID.setPower(power);
                 frontLeftSlide.setPower(power);
-                leftBackFrontRight = true;
+                num = 2;
+            } else if (num ==2) {
+                frontRightSlide.setPower(power);
+                frontLeftSlide.setPower(power);
+                backRightSlidePID.setPower(power);
+                num = 3;
+            } else if (num == 3) {
+                backLeftSlide.setPower(power);
+                frontRightSlide.setPower(power);
+                backRightSlidePID.setPower(power);
+                num =4;
+            } else if (num==4) {
+                backRightSlidePID.setPower(power);
+                backLeftSlide.setPower(power);
+                frontLeftSlide.setPower(power);
+                num = 1;
             }
 
 
-         //
+            //
 
             telemetry.update();
         }

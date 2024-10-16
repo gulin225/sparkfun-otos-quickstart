@@ -36,4 +36,8 @@ public class VerticalSlides {
     public double getEncoderValue(){
         return backLeftSlide.getCurrentPosition();
     }
+
+    public void PIDLoop(){
+
+    }
 }
