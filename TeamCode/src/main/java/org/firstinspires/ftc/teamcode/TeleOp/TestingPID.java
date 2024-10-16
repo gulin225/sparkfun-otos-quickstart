@@ -6,57 +6,99 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @Config
 @TeleOp(name = "TestingPID")
 public class TestingPID extends OpMode {
-private PIDController controller;
+private PIDController controllerUp, controllerDown;
 
 
-
-    public static double f = 0;
+    boolean leftBackFrontRight = true;
+    public static double f = 0.1;
 
     public static int target =0;
-    public static double p = 0, i = 0, d = 0;
-    public final double ticks_in_degrees = 145.1/180; //num of ticks per rotation we need to find this out
-    DcMotorEx backLeftSlidePID, backRightSlide, frontLeftSlide, frontRightSlide;
+    //p = 0.01 d = .001
+    public static double pUp = 0.02, iUp = 0, dUp = 0.000225;
+    public static double pDown = 0.012, iDown = 0, dDown = 0.0012;
+    public final double ticks_in_degrees = 145.1/360; //num of ticks per rotation we need to find this out
+    DcMotorEx backLeftSlide, backRightSlidePID, frontLeftSlide, frontRightSlide;
 
-
+    //max = 1060
     @Override
     public void init() {
-        controller = new PIDController(p,i,d);
+        controllerUp = new PIDController(pUp,iUp,dUp);
+        controllerDown = new PIDController(pDown, iDown, dDown);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        backLeftSlidePID = hardwareMap.get(DcMotorEx.class,"leftBackS");
-        backRightSlide = hardwareMap.get(DcMotorEx.class,"rightBackS");
+        backLeftSlide = hardwareMap.get(DcMotorEx.class,"leftBackS");
+        backRightSlidePID = hardwareMap.get(DcMotorEx.class,"rightBackS");
         frontLeftSlide = hardwareMap.get(DcMotorEx.class,"leftFrontS");
         frontRightSlide = hardwareMap.get(DcMotorEx.class,"rightFrontS");
 
+
+       backRightSlidePID.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightSlidePID.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        //backRightSlidePID.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         frontLeftSlide.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightSlidePID.setDirection(DcMotorSimple.Direction.REVERSE);
+    //   backLeftSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+    //    frontRightSlide.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     @Override
     public void loop() {
-        controller.setPID(p,i,d);
-        int armPos = backLeftSlidePID.getCurrentPosition();
+
+        int armPos = backRightSlidePID.getCurrentPosition();
+
+        if(target > armPos) {
+            controllerUp.setPID(pUp,iUp,dUp);
+            double pid = controllerUp.calculate(armPos, target);
+
+            double ff = Math.cos(Math.toRadians(target / ticks_in_degrees)) * f;
+
+            double power = pid + ff;
+            if(power > 1) power = 1;
+            telemetry.addData("arm pos", armPos);
+            telemetry.addData("target", target);
+            telemetry.addData("power",power);
+
+            backRightSlidePID.setPower(power);
+            backLeftSlide.setPower(power);
+           frontLeftSlide.setPower(power);
+            frontRightSlide.setPower(power);
+            telemetry.update();
+        }
+        else{
+            controllerDown.setPID(pDown, iDown,dDown);
+            double pid = controllerDown.calculate(armPos, target);
+
+            double ff = Math.cos(Math.toRadians(target / ticks_in_degrees)) * f;
+
+            double power = pid + ff;
+
+            telemetry.addData("arm pos", armPos);
+            telemetry.addData("target", target);
+
+          //
+            if(leftBackFrontRight){
+                backLeftSlide.setPower(power);
+                frontRightSlide.setPower(power);
+                leftBackFrontRight = false;
+            }
+            else{
+                backRightSlidePID.setPower(power);
+                frontLeftSlide.setPower(power);
+                leftBackFrontRight = true;
+            }
 
 
+         //
 
-        double pid = controller.calculate(armPos, target);
-
-        double ff = Math.cos(Math.toRadians(target/ticks_in_degrees)) * f;
-
-        double power = pid + ff;
-
-        telemetry.addData("arm pos", armPos);
-        telemetry.addData("target", target);
-
-        backLeftSlidePID.setPower(power);
-        backRightSlide.setPower(power);
-        frontLeftSlide.setPower(power);
-        frontRightSlide.setPower(power);
-        telemetry.update();
+            telemetry.update();
+        }
     }
 }
