@@ -25,6 +25,7 @@ public class ExecutableAuto extends LinearOpMode {
     boolean running;
     AutoStates autoLocation = bucket;
     ActionCreator actionCreator;
+    ParallelAction preload, intakeSample1, outtakeSample1, intakeSample2, outtakeSample2;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -40,7 +41,7 @@ public class ExecutableAuto extends LinearOpMode {
         }
 
         if (testing) driveState = idle;
-        else path = actionCreator.CreatePath(autoLocation, drive);
+        else path = returnAction();
 
         while (!isStopRequested() && opModeIsActive()) {
             switch (driveState){
@@ -52,6 +53,36 @@ public class ExecutableAuto extends LinearOpMode {
                     break;
             }
         }
+        telemetry.addLine(drive.pose.toString());
+    }
+
+    public SequentialAction returnAction(){
+        preload = new ParallelAction(drive.actionBuilder(drive.pose)
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-10,30), Math.toRadians(0)).build()
+        );
+
+        intakeSample1 = new ParallelAction(drive.actionBuilder(new Pose2d(-10,30,Math.toRadians(0)))
+                .setTangent(Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(10,48, Math.toRadians(90)), Math.toRadians(40)).build()
+        );
+
+        outtakeSample1 = new ParallelAction(drive.actionBuilder(new Pose2d(10,48,Math.toRadians(90)))
+                .setTangent(Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(16,32, Math.toRadians(135)), Math.toRadians(160)).build()
+        );
+
+        intakeSample2 = new ParallelAction(drive.actionBuilder(new Pose2d(16,32, Math.toRadians(135)))
+                .setTangent(Math.toRadians(270))
+                .splineToLinearHeading(new Pose2d(45,25, Math.toRadians(90)), Math.toRadians(60)).build()
+        );
+
+        outtakeSample2 = new ParallelAction(drive.actionBuilder(new Pose2d(45,25,Math.toRadians(90)))
+                .setTangent(Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(16,32, Math.toRadians(135)), Math.toRadians(160)).build()
+        );
+
+        return new SequentialAction(preload, intakeSample1, outtakeSample1, intakeSample2, outtakeSample2, intakeSample2, outtakeSample2);
     }
 
 }

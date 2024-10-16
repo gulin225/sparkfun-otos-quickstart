@@ -116,13 +116,13 @@ public class PinpointDrive extends MecanumDrive {
         }
         pinpoint.update();
 
-        Pose2d aprilTagPose = updatePoseWithAprilTag(pinpoint.getHeading());
+        /*Pose2d aprilTagPose = updatePoseWithAprilTag(pinpoint.getHeading());
         if (aprilTagPose != null){
             double weightedX = (pose.position.x + aprilTagPose.position.x)/2;
             double weightedY = (pose.position.y + aprilTagPose.position.y)/2;
             Pose2d weightedPose = new Pose2d(weightedX, weightedY,pose.heading.toDouble());
             telemetry.addData("apriltag", aprilTagPose.toString());
-        }else telemetry.addLine("tag not in sight");
+        }else telemetry.addLine("tag not in sight");*/
 
         pose = pinpoint.getPositionRR();
         lastPinpointPose = pose;
@@ -136,8 +136,7 @@ public class PinpointDrive extends MecanumDrive {
         FlightRecorder.write("PINPOINT_RAW_POSE",new FTCPoseMessage(pinpoint.getPosition()));
         FlightRecorder.write("PINPOINT_STATUS",pinpoint.getDeviceStatus());
 
-        telemetry.addData("RR", pose.toString());
-        telemetry.update();
+
         return pinpoint.getVelocityRR();
     }
 
