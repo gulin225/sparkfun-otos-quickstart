@@ -39,8 +39,8 @@ public class Claw {
                 claw.setPosition(.4);
                 break;
             case intake:
-                leftArm.setPosition(.3);
-                rightArm.setPosition(.3+armOffset);
+                leftArm.setPosition(.35);
+                rightArm.setPosition(.35+armOffset);
                 break;
             case outtake:
                 leftArm.setPosition(.76);

@@ -34,12 +34,13 @@ public class TeleOperation extends LinearOpMode {
 
            if (gamepad2.left_bumper) robot.intake();
            if (gamepad2.right_bumper) robot.outtake();
-           if (gamepad2.dpad_down) robot.verticalSlides.setSlidesUp();
-           if(gamepad2.dpad_down) robot.verticalSlides.setSlidesDown();
+           if (gamepad2.dpad_down) robot.verticalSlides.setSlidesDown();
+           if(gamepad2.dpad_up) robot.verticalSlides.setSlidesUp();
             if(gamepad2.a) {
                 robot.claw.moveClaw(Claw.clawStates.intake);
                 robot.claw.moveClaw(Claw.clawStates.spinOn);
             }
+            telemetry.addLine(gamepad1.right_trigger + "");
             if(gamepad2.b) {
                 robot.claw.moveClaw(Claw.clawStates.outtake);
                 robot.claw.moveClaw(Claw.clawStates.spinOff);
