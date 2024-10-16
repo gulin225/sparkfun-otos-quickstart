@@ -15,7 +15,7 @@ public class TestingPID extends OpMode {
 private PIDController controllerUp, controllerDown;
 
 
-
+    boolean leftBackFrontRight = true;
     public static double f = 0.1;
 
     public static int target =0;
@@ -37,7 +37,10 @@ private PIDController controllerUp, controllerDown;
         frontLeftSlide = hardwareMap.get(DcMotorEx.class,"leftFrontS");
         frontRightSlide = hardwareMap.get(DcMotorEx.class,"rightFrontS");
 
-        backRightSlidePID.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+       backRightSlidePID.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightSlidePID.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         //backRightSlidePID.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         frontLeftSlide.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -64,9 +67,9 @@ private PIDController controllerUp, controllerDown;
             telemetry.addData("power",power);
 
             backRightSlidePID.setPower(power);
-         //   backLeftSlide.setPower(power);
-         //   frontLeftSlide.setPower(power);
-         //   frontRightSlide.setPower(power);
+            backLeftSlide.setPower(power);
+           frontLeftSlide.setPower(power);
+            frontRightSlide.setPower(power);
             telemetry.update();
         }
         else{
@@ -80,10 +83,21 @@ private PIDController controllerUp, controllerDown;
             telemetry.addData("arm pos", armPos);
             telemetry.addData("target", target);
 
-            backRightSlidePID.setPower(power);
-          //  backLeftSlide.setPower(power);
-        //    frontLeftSlide.setPower(power);
-        //    frontRightSlide.setPower(power);
+          //
+            if(leftBackFrontRight){
+                backLeftSlide.setPower(power);
+                frontRightSlide.setPower(power);
+                leftBackFrontRight = false;
+            }
+            else{
+                backRightSlidePID.setPower(power);
+                frontLeftSlide.setPower(power);
+                leftBackFrontRight = true;
+            }
+
+
+         //
+
             telemetry.update();
         }
     }
