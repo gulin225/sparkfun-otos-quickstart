@@ -16,11 +16,10 @@ import org.firstinspires.ftc.teamcode.Autonomous.PinpointDrive;
 @Config
 @Autonomous(name = "Executable", group = "Autonomous")
 public class ExecutableAuto extends LinearOpMode {
-
     AutoStates driveState = followingPath;
     PinpointDrive drive;
     boolean testing = false;
-    final Pose2d startPose = new Pose2d(7,-7, Math.toRadians(0));
+    final Pose2d startPose = new Pose2d(7.9,-8.5, Math.toRadians(0));
     TelemetryPacket tel = new TelemetryPacket();
     SequentialAction path;
     boolean running;
