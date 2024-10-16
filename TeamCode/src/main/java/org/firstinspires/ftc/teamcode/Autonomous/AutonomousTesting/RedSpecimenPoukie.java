@@ -35,14 +35,14 @@ public class RedSpecimenPoukie extends LinearOpMode {
     AutoStates autoStates = preload;
     IMU imu;
     MecanumDrive drive;
-    AprilTagDrive aprilTagDrive;
-    final Pose2d startPose = new Pose2d(18,-63.5, Math.toRadians(0));
+    AprilTagDrive aprilTagDrive; //14.25,41
+    final Pose2d startPose = new Pose2d(30.5,61.75, Math.toRadians(0));
     TelemetryPacket tel = new TelemetryPacket();
     SequentialAction sampleAction;
     ParallelAction preloadAction;
     Limelight limelight;
     boolean running;
-    final Vector2d targetAprilTag = new Vector2d(71.5,-47.5);
+    final Vector2d targetAprilTag = new Vector2d(71.5,47.5);
     final double cameraPlacementX = 7.5;
     final double cameraPlacementY = 0;
     final double cameraAngle = Math.atan(cameraPlacementY/cameraPlacementX);
@@ -88,13 +88,7 @@ public class RedSpecimenPoukie extends LinearOpMode {
                 case idle:
                     break;
             }
-            Pose2d updatedPose = updatePoseWithAprilTag();
-            if (updatedPose != null) {
-                //drive.pose = updatedPose;
-                updatedPose = new Pose2d((drive.pose.position.x + updatedPose.position.x)/2, (drive.pose.position.y + updatedPose.position.y)/2,drive.pose.heading.toDouble());
 
-                telemetry.addData("LL Location", "x: " + updatedPose.position.x + " Y: " + updatedPose.position.y);
-            } else telemetry.addLine("April tag not in sight");
             telemetry.addData("RR Location", "x: " + drive.pose.position.x + " Y: " + drive.pose.position.y);
             telemetry.update();
 
