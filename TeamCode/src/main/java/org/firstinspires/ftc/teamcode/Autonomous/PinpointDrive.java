@@ -77,33 +77,15 @@ public class PinpointDrive extends MecanumDrive {
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         FlightRecorder.write("PINPOINT_PARAMS",PARAMS);
         pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
-
-        // RR localizer note: don't love this conversion (change driver?)
         pinpoint.setOffsets(DistanceUnit.MM.fromInches(PARAMS.xOffset), DistanceUnit.MM.fromInches(PARAMS.yOffset));
-
-
         pinpoint.setEncoderResolution(PARAMS.encoderResolution);
-
         pinpoint.setEncoderDirections(PARAMS.xDirection, PARAMS.yDirection);
-
-        /*
-        Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
-        The IMU will automatically calibrate when first powered on, but recalibrating before running
-        the robot is a good idea to ensure that the calibration is "good".
-        resetPosAndIMU will reset the position to 0,0,0 and also recalibrate the IMU.
-        This is recommended before you run your autonomous, as a bad initial calibration can cause
-        an incorrect starting value for x, y, and heading.
-         */
-        //pinpoint.recalibrateIMU();
         pinpoint.resetPosAndIMU();
-        // wait for pinpoint to finish calibrating
         try {
             Thread.sleep(300);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-
         pinpoint.setPosition(pose);
     }
     public PinpointDrive(HardwareMap hardwareMap, Pose2d pose, Telemetry tel) {
@@ -113,46 +95,23 @@ public class PinpointDrive extends MecanumDrive {
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         FlightRecorder.write("PINPOINT_PARAMS",PARAMS);
         pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
-
-        // RR localizer note: don't love this conversion (change driver?)
         pinpoint.setOffsets(DistanceUnit.MM.fromInches(PARAMS.xOffset), DistanceUnit.MM.fromInches(PARAMS.yOffset));
-
-
         pinpoint.setEncoderResolution(PARAMS.encoderResolution);
-
         pinpoint.setEncoderDirections(PARAMS.xDirection, PARAMS.yDirection);
-
-        /*
-        Before running the robot, recalibrate the IMU. This needs to happen when the robot is stationary
-        The IMU will automatically calibrate when first powered on, but recalibrating before running
-        the robot is a good idea to ensure that the calibration is "good".
-        resetPosAndIMU will reset the position to 0,0,0 and also recalibrate the IMU.
-        This is recommended before you run your autonomous, as a bad initial calibration can cause
-        an incorrect starting value for x, y, and heading.
-         */
-        //pinpoint.recalibrateIMU();
         pinpoint.resetPosAndIMU();
-        // wait for pinpoint to finish calibrating
         try {
             Thread.sleep(300);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         telemetry = tel;
         limelight = new Limelight(hardwareMap, telemetry);
         pinpoint.setPosition(pose);
     }
+
     @Override
     public PoseVelocity2d updatePoseEstimate() {
         if (lastPinpointPose != pose) {
-            // RR localizer note:
-            // Something else is modifying our pose (likely for relocalization),
-            // so we override otos pose with the new pose.
-            // This could potentially cause up to 1 loop worth of drift.
-            // I don't like this solution at all, but it preserves compatibility.
-            // The only alternative is to add getter and setters, but that breaks compat.
-            // Potential alternate solution: timestamp the pose set and backtrack it based on speed?
             pinpoint.setPosition(pose);
         }
         pinpoint.update();
@@ -168,7 +127,6 @@ public class PinpointDrive extends MecanumDrive {
         pose = pinpoint.getPositionRR();
         lastPinpointPose = pose;
 
-        // RR standard
         poseHistory.add(pose);
         while (poseHistory.size() > 100) {
             poseHistory.removeFirst();
