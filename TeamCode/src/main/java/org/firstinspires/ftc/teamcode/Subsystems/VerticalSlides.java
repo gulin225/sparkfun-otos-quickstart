@@ -123,7 +123,7 @@ public class VerticalSlides {
                 target=500;
                 break;
             case highBasket:
-                target=800;
+                target=1000;
                 break;
         }
     }
@@ -134,6 +134,19 @@ public class VerticalSlides {
         frontLeftSlide.setPower(three);
         frontRightSlide.setPower(four);
 
+    }
+    public void setPowerZero(){
+        backLeftSlide.setPower(0);
+        backRightSlidePID.setPower(0);
+        frontLeftSlide.setPower(0);
+        frontRightSlide.setPower(0);
+    }
+
+    public int getTarget(){
+        return target;
+    }
+    public int getCurrent(){
+        return backRightSlidePID.getCurrentPosition();
     }
 
     public void testBackLeft(){

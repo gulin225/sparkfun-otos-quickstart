@@ -22,7 +22,8 @@ public class Robot {
     }
 
     public void init(){
-        claw.moveClaw(Claw.clawStates.wristOuttake);
+        verticalSlides.setSlides(VerticalSlides.slideStates.intake);
+        claw.moveClaw(Claw.clawStates.wristIntake);
         claw.moveClaw(Claw.clawStates.outtake);
         linearRail.moveRail(LinearRail.linearRailStates.outtake);
 

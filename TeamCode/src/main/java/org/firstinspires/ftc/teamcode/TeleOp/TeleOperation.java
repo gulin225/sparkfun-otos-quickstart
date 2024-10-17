@@ -32,8 +32,8 @@ public class TeleOperation extends LinearOpMode {
        robot.init();
 
        while (!isStopRequested() && opModeIsActive()){
-            robot.mecanum.drive(gamepad1);
-            robot.mecanum.setMotorPower();
+          //  robot.mecanum.drive(gamepad1);
+         //   robot.mecanum.setMotorPower();
             robot.verticalSlides.PIDLoop();
            if (gamepad1.square) robot.intake();
            if (gamepad1.circle) robot.outtake();
@@ -46,6 +46,7 @@ public class TeleOperation extends LinearOpMode {
             if(gamepad2.b) {
                 robot.claw.moveClaw(Claw.clawStates.outtake);
                 robot.claw.moveClaw(Claw.clawStates.spinOff);
+                robot.claw.moveClaw(Claw.clawStates.wristOuttake);
             }
            if (gamepad1.dpad_down) {
 
@@ -67,6 +68,9 @@ public class TeleOperation extends LinearOpMode {
            if (gamepad1.left_bumper) robot.claw.moveClaw(Claw.clawStates.open);
            if (gamepad1.right_bumper) robot.claw.moveClaw(Claw.clawStates.close);
 
+
+           telemetry.addData("target", robot.verticalSlides.getTarget());
+           telemetry.addData("cujrrent", robot.verticalSlides.getCurrent());
            telemetry.update();
        }
 

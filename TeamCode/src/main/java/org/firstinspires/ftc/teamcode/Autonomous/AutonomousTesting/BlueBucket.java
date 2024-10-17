@@ -13,6 +13,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -23,8 +24,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Autonomous.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Autonomous.PinpointDrive;
+import org.firstinspires.ftc.teamcode.Autonomous.SubsystemActions.BotActions;
 import org.firstinspires.ftc.teamcode.Subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AprilTagDrive.*;
+import org.firstinspires.ftc.teamcode.Subsystems.Robot;
 
 import java.util.ArrayList;
 
@@ -35,6 +38,7 @@ import java.util.ArrayList;
 public class BlueBucket extends LinearOpMode {
 
     AutoStates autoStates = preload;
+    BotActions botActions;
     IMU imu;
     PinpointDrive drive;
     AprilTagDrive aprilTagDrive; //14.25,41
@@ -42,6 +46,8 @@ public class BlueBucket extends LinearOpMode {
     TelemetryPacket tel = new TelemetryPacket();
     SequentialAction sampleAction;
     SequentialAction preloadAction;
+    ParallelAction teleOpAction;
+    ParallelAction bothPreloadTeleop;
     Limelight limelight;
     boolean running;
     final Vector2d targetAprilTag = new Vector2d(47.5,71.5);
@@ -52,6 +58,7 @@ public class BlueBucket extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         drive = new PinpointDrive(hardwareMap, startPose);
+        botActions = new BotActions(hardwareMap);
         while(!isStopRequested() && !opModeIsActive()) {
         }
 
@@ -62,14 +69,16 @@ public class BlueBucket extends LinearOpMode {
         autoStates = preload;
         if (autoStates == idle) {}
         else {
-            preloadAction = createPreloadAction();
-            running = preloadAction.run(tel);
+           preloadAction = createPreloadAction();
+            teleOpAction = createTeleOpAction();
+            bothPreloadTeleop = createBothPreloadTeleop();
+            running = bothPreloadTeleop.run(tel);
         }
 
         while (!isStopRequested() && opModeIsActive()) {
             switch (autoStates){
                 case preload:
-                    running = preloadAction.run(tel);
+                    running = bothPreloadTeleop.run(tel);
                     if (!running) {
                         autoStates = idle;
                     }
@@ -97,36 +106,58 @@ public class BlueBucket extends LinearOpMode {
         //32 back, 10 forward
         SequentialAction preloadAction = new SequentialAction(drive.actionBuilder(drive.pose)
                     .setTangent(Math.toRadians(170))
-                    .splineToConstantHeading(new Vector2d(-30,10), Math.toRadians(150)).build(),
+                    .splineToConstantHeading(new Vector2d(-30,5), Math.toRadians(150)).build(),
                 new ParallelAction(drive.actionBuilder(new Pose2d(-30,10,Math.toRadians(0)))
                     .setTangent(Math.toRadians(300))
-                    .splineToLinearHeading(new Pose2d(-42,-24, Math.toRadians(-90)), Math.toRadians(200)).build()
-                ),
-                new ParallelAction(drive.actionBuilder(new Pose2d(-42,-24, Math.toRadians(-90)))
-                    .setTangent(Math.toRadians(0))
-                    .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
-                ),
-                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
-                        .setTangent(Math.toRadians(180))
-                        .splineToLinearHeading(new Pose2d(-25,-37,Math.toRadians(-180)),Math.toRadians(180)).build()
-                ),
-                new ParallelAction(drive.actionBuilder(new Pose2d(-25,-37,Math.toRadians(-180)))
-                        .setTangent(Math.toRadians(0))
-                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
-                ),
-                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
-                        .setTangent(Math.toRadians(0))
-                        .splineToLinearHeading(new Pose2d(-30,-40,Math.toRadians(-100)),Math.toRadians(0)).build()
-                ),
-                new ParallelAction(drive.actionBuilder(new Pose2d(-25,-39,Math.toRadians(-100)))
-                        .setTangent(Math.toRadians(0))
-                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+                    .splineToLinearHeading(new Pose2d(-42,-24, Math.toRadians(-90)), Math.toRadians(200)).build(),
+                        new SequentialAction(new SleepAction(.5), botActions.intake())
                 )
+//                new ParallelAction(drive.actionBuilder(new Pose2d(-42,-24, Math.toRadians(-90)))
+//                    .setTangent(Math.toRadians(0))
+//                    .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+//                ),
+//                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
+//                        .setTangent(Math.toRadians(180))
+//                        .splineToLinearHeading(new Pose2d(-25,-37,Math.toRadians(-180)),Math.toRadians(180)).build()
+//                ),
+//                new ParallelAction(drive.actionBuilder(new Pose2d(-25,-37,Math.toRadians(-180)))
+//                        .setTangent(Math.toRadians(0))
+//                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+//                ),
+//                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
+//                        .setTangent(Math.toRadians(0))
+//                        .splineToLinearHeading(new Pose2d(-30,-40,Math.toRadians(-100)),Math.toRadians(0)).build()
+//                ),
+//                new ParallelAction(drive.actionBuilder(new Pose2d(-25,-39,Math.toRadians(-100)))
+//                        .setTangent(Math.toRadians(0))
+//                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+//                )
 
         );
 
 
         return  preloadAction;
+    }
+
+    public ParallelAction createTeleOpAction(){
+
+//        ParallelAction preloadTeleop = new ParallelAction(botActions.clawActions.closeClawAction());
+//       return preloadTeleop;
+        ParallelAction teleOpAction = new ParallelAction(
+                botActions.slideActions.highBasketAction(),
+                botActions.init(),
+                new SequentialAction(new SleepAction(2.5), botActions.clawActions.openClawAction())
+
+        );
+        return teleOpAction;
+    }
+        public ParallelAction createBothPreloadTeleop(){
+
+        preloadAction = createPreloadAction();
+        teleOpAction = createTeleOpAction();
+        ParallelAction both = new ParallelAction( teleOpAction,preloadAction);
+
+        return both;
     }
 
     public SequentialAction createSampleAction(){
@@ -139,6 +170,7 @@ public class BlueBucket extends LinearOpMode {
                 .build()
                 //There should be sleep actions with subsytem movements inside each parallel action
         );
+
 
         ParallelAction sample2Action = new ParallelAction(drive.actionBuilder(drive.pose)
                 .lineToY(-33)
@@ -153,6 +185,8 @@ public class BlueBucket extends LinearOpMode {
         SequentialAction specimenSequence = new SequentialAction(sample1Action);
         return specimenSequence;
     }
+
+
 
 
 }
