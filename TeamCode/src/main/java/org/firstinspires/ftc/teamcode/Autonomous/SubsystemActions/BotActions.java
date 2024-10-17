@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Autonomous.SubsystemActions;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Subsystems.LinearRail;

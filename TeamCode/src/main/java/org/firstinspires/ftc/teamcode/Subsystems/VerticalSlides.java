@@ -23,6 +23,7 @@ public class VerticalSlides {
    public static int target =0;
     //p = 0.01 d = .001
     public static double pUp = 0.021, iUp = 0, dUp = 0.000225;
+    int num;
     public static double pDown = 0.015, iDown = 0, dDown = 0.00012;
     public final double ticks_in_degrees = 145.1/360; //num of ticks per rotation we need to find this out
     DcMotorEx backLeftSlide, backRightSlidePID, frontLeftSlide, frontRightSlide;
@@ -76,7 +77,7 @@ public class VerticalSlides {
 
             double power = pid + ff;
 
-            int num = 1;
+            num = 1;
             if(num == 1){
                 backLeftSlide.setPower(power);
                 frontRightSlide.setPower(power);

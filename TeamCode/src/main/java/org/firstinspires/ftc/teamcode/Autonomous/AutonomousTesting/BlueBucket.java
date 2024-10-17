@@ -3,9 +3,6 @@ package org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting;
 
 import static org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AutoStates.idle;
 import static org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AutoStates.preload;
-import static org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AutoStates.samples;
-
-import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -15,21 +12,11 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.Autonomous.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Autonomous.PinpointDrive;
 import org.firstinspires.ftc.teamcode.Autonomous.SubsystemActions.BotActions;
-import org.firstinspires.ftc.teamcode.Subsystems.Limelight;
-import org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AprilTagDrive.*;
-import org.firstinspires.ftc.teamcode.Subsystems.Robot;
-
-import java.util.ArrayList;
 
 //-72 y = red side
 //x is pos on red side
@@ -39,26 +26,19 @@ public class BlueBucket extends LinearOpMode {
 
     AutoStates autoStates = preload;
     BotActions botActions;
-    IMU imu;
     PinpointDrive drive;
-    AprilTagDrive aprilTagDrive; //14.25,41
     final Pose2d startPose = new Pose2d(0,0, Math.toRadians(0));
     TelemetryPacket tel = new TelemetryPacket();
-    SequentialAction sampleAction;
-    SequentialAction preloadAction;
-    ParallelAction teleOpAction;
-    ParallelAction bothPreloadTeleop;
-    Limelight limelight;
+    Action SlidePIDLoop;
+    ParallelAction path;
     boolean running;
-    final Vector2d targetAprilTag = new Vector2d(47.5,71.5);
-    final double cameraPlacementX = 7.5;
-    final double cameraPlacementY = 0;
-    final double cameraAngle = Math.atan(cameraPlacementY/cameraPlacementX);
-    final double botCenterHypotenuse = Math.sqrt(Math.pow(cameraPlacementX,2) + Math.pow(cameraPlacementY,2));
+
     @Override
     public void runOpMode() throws InterruptedException {
         drive = new PinpointDrive(hardwareMap, startPose);
         botActions = new BotActions(hardwareMap);
+        SlidePIDLoop = botActions.slideActions.PID();
+
         while(!isStopRequested() && !opModeIsActive()) {
         }
 
@@ -69,24 +49,15 @@ public class BlueBucket extends LinearOpMode {
         autoStates = preload;
         if (autoStates == idle) {}
         else {
-           preloadAction = createPreloadAction();
-            teleOpAction = createTeleOpAction();
-            bothPreloadTeleop = createBothPreloadTeleop();
-            running = bothPreloadTeleop.run(tel);
+            path = createAuto();
+            running = path.run(tel);
         }
 
         while (!isStopRequested() && opModeIsActive()) {
             switch (autoStates){
                 case preload:
-                    running = bothPreloadTeleop.run(tel);
+                    running = path.run(tel);
                     if (!running) {
-                        autoStates = idle;
-                    }
-                    break;
-                case samples:
-                    running = sampleAction.run(tel);
-                    if (!running) {
-
                         autoStates = idle;
                     }
                     break;
@@ -94,15 +65,15 @@ public class BlueBucket extends LinearOpMode {
                     break;
             }
 
-            telemetry.addData("State", autoStates);
-            telemetry.addData("RR Location", "x: " + drive.pose.position.x + " Y: " + drive.pose.position.y);
-            telemetry.update();
+            SlidePIDLoop.run(tel);
 
+            telemetry.addData("State", autoStates);
+            telemetry.addLine(drive.pose.toString());
+            telemetry.update();
         }
     }
-
-
-    public SequentialAction createPreloadAction(){
+    
+    public SequentialAction createPath(){
         //32 back, 10 forward
         SequentialAction preloadAction = new SequentialAction(drive.actionBuilder(drive.pose)
                     .setTangent(Math.toRadians(170))
@@ -114,11 +85,12 @@ public class BlueBucket extends LinearOpMode {
                 new ParallelAction(drive.actionBuilder(new Pose2d(-30,5,Math.toRadians(0)))
                     .setTangent(Math.toRadians(300))
                     .splineToLinearHeading(new Pose2d(-39,-11.25, Math.toRadians(-90)), Math.toRadians(200)).build(),
-                        new SequentialAction(new SleepAction(.5), botActions.intake(),
-                              //  new SequentialAction(drive.actionBuilder(new Pose2d(-30,-10.5,Math.toRadians(0))).lineToY(-11.5).build(),
-                                new SleepAction(2)
-                                , botActions.clawActions.spinOffAction()
-                ),
+                        new SequentialAction(
+                                new SleepAction(.5),
+                                botActions.intake(),
+                                new SleepAction(2),
+                                botActions.clawActions.spinOffAction()
+                        ),
                 new ParallelAction(drive.actionBuilder(new Pose2d(-42,-24, Math.toRadians(-90)))
                     .setTangent(Math.toRadians(0))
                     .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
@@ -146,56 +118,17 @@ public class BlueBucket extends LinearOpMode {
         return  preloadAction;
     }
 
-    public ParallelAction createTeleOpAction(){
-
-//        ParallelAction preloadTeleop = new ParallelAction(botActions.clawActions.closeClawAction());
-//       return preloadTeleop;
-        ParallelAction teleOpAction = new ParallelAction(
+    public ParallelAction createAuto(){
+        SequentialAction path = createPath();
+        ParallelAction subsystemAction = new ParallelAction(
                 botActions.slideActions.highBasketAction(),
                 botActions.init(),
                 new SequentialAction(new SleepAction(2.2), botActions.clawActions.openClawAction())
 
         );
-        return teleOpAction;
+
+        return new ParallelAction( subsystemAction, path);
     }
-        public ParallelAction createBothPreloadTeleop(){
-
-        preloadAction = createPreloadAction();
-        teleOpAction = createTeleOpAction();
-        ParallelAction both = new ParallelAction( teleOpAction,preloadAction);
-
-        return both;
-    }
-
-    public SequentialAction createSampleAction(){
-        //Each action goes to the sample, then deposits it at the human player
-        ParallelAction sample1Action = new ParallelAction(drive.actionBuilder(drive.pose)
-                .splineToConstantHeading(new Vector2d(-29,-34), Math.toRadians(260))
-                .waitSeconds(1)
-                //.splineToConstantHeading(new Vector2d(57,-19), Math.toRadians(340))
-                //.waitSeconds(1) -29.4 -36.5
-                .build()
-                //There should be sleep actions with subsytem movements inside each parallel action
-        );
-
-
-        ParallelAction sample2Action = new ParallelAction(drive.actionBuilder(drive.pose)
-                .lineToY(-33)
-                .splineToLinearHeading(new Pose2d(57,62,Math.toRadians(-4.5)), Math.toRadians(-90))
-                .waitSeconds(1).build()
-        );
-
-        ParallelAction sample3Action = new ParallelAction(drive.actionBuilder(drive.pose)
-                .build()
-        );
-
-        SequentialAction specimenSequence = new SequentialAction(sample1Action);
-        return specimenSequence;
-    }
-
-
-
-
 }
 
 

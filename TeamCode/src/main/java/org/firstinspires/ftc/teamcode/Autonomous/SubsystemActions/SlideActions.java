@@ -29,6 +29,19 @@ public class SlideActions {
             return true;
         }
     }
+    public class PIDLoop implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                verticalSlides.PIDLoop();
+                initialized = true;
+            }
+
+            return true;
+        }
+    }
     public class highRung implements Action {
         private boolean initialized = false;
 
@@ -87,4 +100,5 @@ public class SlideActions {
     public Action intakeAction(){
         return new intake();
     }
+    public Action PID() { return new PIDLoop(); }
 }
