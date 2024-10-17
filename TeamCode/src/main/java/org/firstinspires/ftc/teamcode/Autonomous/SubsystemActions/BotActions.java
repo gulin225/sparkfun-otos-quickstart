@@ -33,7 +33,7 @@ public class BotActions {
     }
 
     public ParallelAction intake(){
-        ParallelAction intake = new  ParallelAction(linearRailActions.intakeAction(), slideActions.intakeAction(), clawActions.openClawAction(), clawActions.armIntakeAction());
+        ParallelAction intake = new  ParallelAction(linearRailActions.intakeAction(), slideActions.intakeAction(), clawActions.openClawAction(), clawActions.armIntakeAction(), clawActions.spinOnAction());
         return intake;
     }
 

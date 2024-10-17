@@ -79,6 +79,32 @@ public class ClawActions {
             return true;
         }
     }
+    public class spinOn implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                claw.moveClaw(Claw.clawStates.spinOn);
+                initialized = true;
+            }
+
+            return true;
+        }
+    }
+    public class spinOff implements Action {
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                claw.moveClaw(Claw.clawStates.spinOff);
+                initialized = true;
+            }
+
+            return true;
+        }
+    }
 
     public Action closeClawAction() {
         return new closeClaw();
@@ -95,6 +121,12 @@ public class ClawActions {
     }
     public Action wristOn(){
         return new wristIntake();
+    }
+    public Action spinOnAction(){
+        return new spinOn();
+    }
+    public Action spinOffAction(){
+        return new spinOff();
     }
 
 }
