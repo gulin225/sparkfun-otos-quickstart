@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Robot {
-    public Mecanum mecanum;
     public Claw claw;
     public Limelight limelight;
     public LinearRail linearRail;
@@ -13,7 +12,6 @@ public class Robot {
     public VerticalSlides verticalSlides;
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry){
-        mecanum = new Mecanum(hardwareMap);
         linearRail = new LinearRail(hardwareMap);
         claw = new Claw(hardwareMap);
      //   limelight = new Limelight(hardwareMap, telemetry);

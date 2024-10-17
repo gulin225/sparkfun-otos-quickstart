@@ -37,7 +37,6 @@ public class BlueBucket extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         drive = new PinpointDrive(hardwareMap, startPose);
         botActions = new BotActions(hardwareMap);
-        SlidePIDLoop = botActions.slideActions.PID();
 
         waitForStart();
 
@@ -49,6 +48,8 @@ public class BlueBucket extends LinearOpMode {
         }
 
         while (!isStopRequested() && opModeIsActive()) {
+            SlidePIDLoop = botActions.slideActions.PID();
+
             switch (autoStates){
                 case runningPath:
                     running = path.run(tel);
@@ -72,40 +73,40 @@ public class BlueBucket extends LinearOpMode {
         SequentialAction path = new SequentialAction(
                 new ParallelAction(drive.actionBuilder(drive.pose)
                     .setTangent(Math.toRadians(170))
-                    .splineToConstantHeading(new Vector2d(-25,5), Math.toRadians(150))
+                    .splineToConstantHeading(new Vector2d(17,15), Math.toRadians(150))
                     .waitSeconds(.4).build(),
                     botActions.init(),
                     new SequentialAction(new SleepAction(2.2), botActions.clawActions.openClawAction())
                 ),
 
-                new ParallelAction(drive.actionBuilder(new Pose2d(-30,5,Math.toRadians(0)))
+                new ParallelAction(drive.actionBuilder(new Pose2d(30,5,Math.toRadians(0)))
                     .setTangent(Math.toRadians(300))
-                    .splineToLinearHeading(new Pose2d(-39,-11.25, Math.toRadians(-90)), Math.toRadians(200)).build(),
+                    .splineToLinearHeading(new Pose2d(42,-11.5, Math.toRadians(-90)), Math.toRadians(200)).build(),
                     new SequentialAction(
                         new SleepAction(.5),
                         botActions.intake(),
                         new SleepAction(2),
                         botActions.clawActions.spinOffAction()
                     ),
-                    new ParallelAction(drive.actionBuilder(new Pose2d(-42,-24, Math.toRadians(-90)))
+                    new ParallelAction(drive.actionBuilder(new Pose2d(42,-24, Math.toRadians(-90)))
                         .setTangent(Math.toRadians(0))
-                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+                        .splineToLinearHeading(new Pose2d(10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
                 )
-//                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
+//                new ParallelAction(drive.actionBuilder(new Pose2d(10,-34,Math.toRadians(-225)))
 //                        .setTangent(Math.toRadians(180))
-//                        .splineToLinearHeading(new Pose2d(-25,-37,Math.toRadians(-180)),Math.toRadians(180)).build()
+//                        .splineToLinearHeading(new Pose2d(25,-37,Math.toRadians(-180)),Math.toRadians(180)).build()
 //                ),
-//                new ParallelAction(drive.actionBuilder(new Pose2d(-25,-37,Math.toRadians(-180)))
+//                new ParallelAction(drive.actionBuilder(new Pose2d(25,-37,Math.toRadians(-180)))
 //                        .setTangent(Math.toRadians(0))
-//                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+//                        .splineToLinearHeading(new Pose2d(10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
 //                ),
-//                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
+//                new ParallelAction(drive.actionBuilder(new Pose2d(10,-34,Math.toRadians(-225)))
 //                        .setTangent(Math.toRadians(0))
-//                        .splineToLinearHeading(new Pose2d(-30,-40,Math.toRadians(-100)),Math.toRadians(0)).build()
+//                        .splineToLinearHeading(new Pose2d(30,-40,Math.toRadians(-100)),Math.toRadians(0)).build()
 //                ),
-//                new ParallelAction(drive.actionBuilder(new Pose2d(-25,-39,Math.toRadians(-100)))
+//                new ParallelAction(drive.actionBuilder(new Pose2d(25,-39,Math.toRadians(-100)))
 //                        .setTangent(Math.toRadians(0))
-//                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+//                        .splineToLinearHeading(new Pose2d(10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
 //                )
 
         ));

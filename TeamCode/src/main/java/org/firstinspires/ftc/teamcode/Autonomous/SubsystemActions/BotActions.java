@@ -24,7 +24,13 @@ public class BotActions {
     }
 
     public ParallelAction init(){
-        ParallelAction init = new ParallelAction(clawActions.closeClawAction(), slideActions.highRungAction(), linearRailActions.outtakeAction(), clawActions.armOuttakeAction(),  clawActions.wristOn());
+        ParallelAction init = new ParallelAction(
+                clawActions.closeClawAction(),
+                slideActions.highRungAction(),
+                linearRailActions.outtakeAction(),
+                clawActions.armIntakeAction(),
+                clawActions.wristOn()
+        );
         return init;
     }
 

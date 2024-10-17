@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AprilTagDrive;
+
 public class VerticalSlides {
     private PIDController controllerUp, controllerDown;
 
@@ -121,7 +123,7 @@ public class VerticalSlides {
                 target=200;
                 break;
             case highRung:
-                target=500;
+                target=800;
                 break;
             case highBasket:
                 target=1000;
