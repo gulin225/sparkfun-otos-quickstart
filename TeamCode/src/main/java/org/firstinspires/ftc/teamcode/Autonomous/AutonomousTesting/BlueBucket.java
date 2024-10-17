@@ -30,7 +30,7 @@ public class BlueBucket extends LinearOpMode {
     final Pose2d startPose = new Pose2d(0,0, Math.toRadians(0));
     TelemetryPacket tel = new TelemetryPacket();
     Action SlidePIDLoop;
-    ParallelAction path;
+    SequentialAction path;
     boolean running;
 
     @Override
@@ -44,7 +44,7 @@ public class BlueBucket extends LinearOpMode {
         if (isStopRequested()) return;
 
         if (autoStates == runningPath) {
-            path = createAuto();
+            path = createPath();
             running = path.run(tel);
         }
 
@@ -72,8 +72,10 @@ public class BlueBucket extends LinearOpMode {
         SequentialAction path = new SequentialAction(
                 new ParallelAction(drive.actionBuilder(drive.pose)
                     .setTangent(Math.toRadians(170))
-                    .splineToConstantHeading(new Vector2d(-30,5), Math.toRadians(150))
-                    .waitSeconds(.4).build()
+                    .splineToConstantHeading(new Vector2d(-25,5), Math.toRadians(150))
+                    .waitSeconds(.4).build(),
+                    botActions.init(),
+                    new SequentialAction(new SleepAction(2.2), botActions.clawActions.openClawAction())
                 ),
 
                 new ParallelAction(drive.actionBuilder(new Pose2d(-30,5,Math.toRadians(0)))
@@ -109,18 +111,6 @@ public class BlueBucket extends LinearOpMode {
         ));
 
         return  path;
-    }
-
-    public ParallelAction createAuto(){
-        SequentialAction path = createPath();
-        ParallelAction subsystemAction = new ParallelAction(
-           botActions.slideActions.highBasketAction(),
-           botActions.init(),
-           new SequentialAction(new SleepAction(2.2), botActions.clawActions.openClawAction())
-
-        );
-
-        return new ParallelAction( subsystemAction, path);
     }
 }
 
