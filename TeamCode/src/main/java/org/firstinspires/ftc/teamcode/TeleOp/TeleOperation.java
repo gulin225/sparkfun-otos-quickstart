@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @TeleOp(name = "test")
 public class TeleOperation extends LinearOpMode {
     Robot robot;
+
     @Override
     public void runOpMode() throws InterruptedException {
        robot = new Robot(hardwareMap, telemetry);
@@ -31,6 +32,8 @@ public class TeleOperation extends LinearOpMode {
        robot.init();
 
        while (!isStopRequested() && opModeIsActive()){
+            robot.mecanum.drive(gamepad1);
+            robot.mecanum.setMotorPower();
             robot.verticalSlides.PIDLoop();
            if (gamepad1.square) robot.intake();
            if (gamepad1.circle) robot.outtake();
