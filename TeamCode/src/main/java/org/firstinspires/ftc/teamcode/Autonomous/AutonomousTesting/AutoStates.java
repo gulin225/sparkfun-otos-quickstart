@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting;
 public enum AutoStates {
-    followingPath, idle, preload, samples,
+    followingPath, idle, runningPath,
     bucket, specimen
 }
 

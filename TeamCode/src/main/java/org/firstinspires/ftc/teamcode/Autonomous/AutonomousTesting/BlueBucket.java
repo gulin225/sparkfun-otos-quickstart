@@ -2,7 +2,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting;
 
 import static org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AutoStates.idle;
-import static org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AutoStates.preload;
+import static org.firstinspires.ftc.teamcode.Autonomous.AutonomousTesting.AutoStates.runningPath;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.Autonomous.SubsystemActions.BotActions;
 @Autonomous(name = "BlueBucket", group = "Autonomous")
 public class BlueBucket extends LinearOpMode {
 
-    AutoStates autoStates = preload;
+    AutoStates autoStates = runningPath;
     BotActions botActions;
     PinpointDrive drive;
     final Pose2d startPose = new Pose2d(0,0, Math.toRadians(0));
@@ -39,23 +39,18 @@ public class BlueBucket extends LinearOpMode {
         botActions = new BotActions(hardwareMap);
         SlidePIDLoop = botActions.slideActions.PID();
 
-        while(!isStopRequested() && !opModeIsActive()) {
-        }
-
         waitForStart();
 
         if (isStopRequested()) return;
 
-        autoStates = preload;
-        if (autoStates == idle) {}
-        else {
+        if (autoStates == runningPath) {
             path = createAuto();
             running = path.run(tel);
         }
 
         while (!isStopRequested() && opModeIsActive()) {
             switch (autoStates){
-                case preload:
+                case runningPath:
                     running = path.run(tel);
                     if (!running) {
                         autoStates = idle;
@@ -72,28 +67,27 @@ public class BlueBucket extends LinearOpMode {
             telemetry.update();
         }
     }
-    
+
     public SequentialAction createPath(){
-        //32 back, 10 forward
-        SequentialAction preloadAction = new SequentialAction(drive.actionBuilder(drive.pose)
+        SequentialAction path = new SequentialAction(
+                new ParallelAction(drive.actionBuilder(drive.pose)
                     .setTangent(Math.toRadians(170))
                     .splineToConstantHeading(new Vector2d(-30,5), Math.toRadians(150))
-                .waitSeconds(.4)
-                .build(),
-
+                    .waitSeconds(.4).build()
+                ),
 
                 new ParallelAction(drive.actionBuilder(new Pose2d(-30,5,Math.toRadians(0)))
                     .setTangent(Math.toRadians(300))
                     .splineToLinearHeading(new Pose2d(-39,-11.25, Math.toRadians(-90)), Math.toRadians(200)).build(),
-                        new SequentialAction(
-                                new SleepAction(.5),
-                                botActions.intake(),
-                                new SleepAction(2),
-                                botActions.clawActions.spinOffAction()
-                        ),
-                new ParallelAction(drive.actionBuilder(new Pose2d(-42,-24, Math.toRadians(-90)))
-                    .setTangent(Math.toRadians(0))
-                    .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
+                    new SequentialAction(
+                        new SleepAction(.5),
+                        botActions.intake(),
+                        new SleepAction(2),
+                        botActions.clawActions.spinOffAction()
+                    ),
+                    new ParallelAction(drive.actionBuilder(new Pose2d(-42,-24, Math.toRadians(-90)))
+                        .setTangent(Math.toRadians(0))
+                        .splineToLinearHeading(new Pose2d(-10,-34,Math.toRadians(-225)),Math.toRadians(0)).build()
                 )
 //                new ParallelAction(drive.actionBuilder(new Pose2d(-10,-34,Math.toRadians(-225)))
 //                        .setTangent(Math.toRadians(180))
@@ -114,16 +108,15 @@ public class BlueBucket extends LinearOpMode {
 
         ));
 
-
-        return  preloadAction;
+        return  path;
     }
 
     public ParallelAction createAuto(){
         SequentialAction path = createPath();
         ParallelAction subsystemAction = new ParallelAction(
-                botActions.slideActions.highBasketAction(),
-                botActions.init(),
-                new SequentialAction(new SleepAction(2.2), botActions.clawActions.openClawAction())
+           botActions.slideActions.highBasketAction(),
+           botActions.init(),
+           new SequentialAction(new SleepAction(2.2), botActions.clawActions.openClawAction())
 
         );
 
